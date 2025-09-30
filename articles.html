@@ -2,22 +2,62 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <title>Articles - Play Lab</title>
   <style>
+    :root {
+      --bg: #0f172a;
+      --text-light: #e6eef6;
+      --accent: #38bdf8;
+      --text-muted: #94a3b8;
+    }
+
     body {
-      background: #0f172a;
-      color: #e6eef6;
+      background: var(--bg);
+      color: var(--text-light);
       font-family: Inter, system-ui, -apple-system, Roboto, "Segoe UI", Arial;
       padding: 30px;
       max-width: 720px;
       margin: auto;
     }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+    }
+
+    p {
+      font-size: 1.2rem;
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+
     a {
-      color: #38bdf8;
+      color: var(--accent);
       text-decoration: none;
     }
+
     a:hover {
       text-decoration: underline;
+    }
+
+    /* Media Queries for Responsiveness */
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2rem;
+      }
+      p {
+        font-size: 1rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 1.8rem;
+      }
+      p {
+        font-size: 0.9rem;
+      }
     }
   </style>
 </head>
