@@ -12,6 +12,7 @@
       --text-light: #e6eef6;
       --text-muted: #94a3b8;
     }
+
     body {
       margin: 0;
       min-height: 100vh;
@@ -23,12 +24,14 @@
       align-items: center;
       padding: 40px 20px;
     }
+
     h1 {
       font-size: 2.5rem;
       margin-bottom: 20px;
       color: var(--accent);
       user-select: none;
     }
+
     label {
       display: block;
       margin-top: 20px;
@@ -36,6 +39,7 @@
       color: var(--text-muted);
       user-select: none;
     }
+
     textarea, select, button {
       width: 100%;
       max-width: 480px;
@@ -47,16 +51,19 @@
       font-family: inherit;
       box-sizing: border-box;
     }
+
     textarea {
       resize: vertical;
       min-height: 100px;
       background: #1e293b;
       color: var(--text-light);
     }
+
     select {
       background: #1e293b;
       color: var(--text-light);
     }
+
     button {
       background: var(--accent);
       color: var(--bg);
@@ -66,10 +73,12 @@
       transition: background 0.3s ease;
       border: none;
     }
+
     button:hover, button:focus {
       background: #0ea5e9;
       outline: none;
     }
+
     .output {
       margin-top: 30px;
       word-break: break-word;
@@ -82,14 +91,61 @@
       color: #d1d5db;
       user-select: text;
     }
+
     a.back-link {
       margin-top: 40px;
       color: var(--accent);
       text-decoration: none;
       user-select: none;
     }
+
     a.back-link:hover {
       text-decoration: underline;
+    }
+
+    /* Mobile responsiveness */
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2rem;
+      }
+
+      h2 {
+        font-size: 1.6rem;
+      }
+
+      label {
+        font-size: 1rem;
+      }
+
+      textarea, select, button {
+        font-size: 1rem;
+        padding: 10px;
+      }
+
+      .output {
+        font-size: 1rem;
+        padding: 14px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 1.8rem;
+      }
+
+      label {
+        font-size: 0.9rem;
+      }
+
+      textarea, select, button {
+        font-size: 0.9rem;
+        padding: 8px;
+      }
+
+      .output {
+        font-size: 0.9rem;
+        padding: 12px;
+      }
     }
   </style>
 </head>
