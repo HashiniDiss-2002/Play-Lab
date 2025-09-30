@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CypherLab - Caesar Cipher</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>🔐 CypherLab</h1>
+    <h2>Caesar Cipher Tool</h2>
+
+    <label for="mode">Mode:</label>
+    <select id="mode">
+      <option value="encode">Encode</option>
+      <option value="decode">Decode</option>
+    </select>
+
+    <label for="shift">Shift:</label>
+    <input type="number" id="shift" value="3" min="1" max="25">
+
+    <label for="input">Input Text:</label>
+    <textarea id="input" placeholder="Enter your message here..."></textarea>
+
+    <label for="output">Output:</label>
+    <textarea id="output" readonly></textarea>
+
+    <button onclick="processText()">Run Cipher</button>
+    <p class="note">This Caesar Cipher tool works offline and is safe to use.</p>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
