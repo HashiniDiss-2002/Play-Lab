@@ -1,34 +1,100 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>CypherLab - Caesar Cipher</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Play Lab - Welcome</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #111827;
+      --accent: #38bdf8;
+      --text-light: #e6eef6;
+      --text-muted: #94a3b8;
+    }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, system-ui, -apple-system, Roboto, "Segoe UI", Arial;
+      background: linear-gradient(180deg, var(--bg), #020617 80%);
+      color: var(--text-light);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+    }
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 16px;
+      color: var(--accent);
+      user-select: none;
+    }
+    p.subtitle {
+      margin: 0 0 40px;
+      font-size: 1.2rem;
+      color: var(--text-muted);
+      user-select: none;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 24px;
+      width: 100%;
+      max-width: 960px;
+    }
+    a.card {
+      background: var(--card-bg);
+      border-radius: 14px;
+      padding: 24px 20px;
+      box-shadow: 0 6px 24px rgba(2, 6, 23, 0.5);
+      color: var(--text-light);
+      text-decoration: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      cursor: pointer;
+      user-select: none;
+    }
+    a.card:hover,
+    a.card:focus {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 32px rgba(56, 189, 248, 0.6);
+      outline: none;
+    }
+    a.card h2 {
+      margin: 0 0 8px;
+      font-size: 1.6rem;
+      color: var(--accent);
+    }
+    a.card p {
+      margin: 0;
+      font-size: 1rem;
+      color: var(--text-muted);
+      text-align: center;
+      max-width: 260px;
+      user-select: none;
+    }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>🔐 CypherLab</h1>
-    <h2>Caesar Cipher Tool</h2>
+  <h1>Welcome to Play Lab</h1>
+  <p class="subtitle">Choose a tool to get started</p>
 
-    <label for="mode">Mode:</label>
-    <select id="mode">
-      <option value="encode">Encode</option>
-      <option value="decode">Decode</option>
-    </select>
-
-    <label for="shift">Shift:</label>
-    <input type="number" id="shift" value="3" min="1" max="25">
-
-    <label for="input">Input Text:</label>
-    <textarea id="input" placeholder="Enter your message here..."></textarea>
-
-    <label for="output">Output:</label>
-    <textarea id="output" readonly></textarea>
-
-    <button onclick="processText()">Run Cipher</button>
-    <p class="note">This Caesar Cipher tool works offline and is safe to use.</p>
+  <div class="grid">
+    <a href="caesar.html" class="card" tabindex="0" aria-label="Go to Caesar Cipher tool">
+      <h2>Caesar Cipher</h2>
+      <p>Encode and decode text using the classic Caesar cipher.</p>
+    </a>
+    <a href="hash.html" class="card" tabindex="0" aria-label="Go to Hash Generator tool">
+      <h2>Hash Generator</h2>
+      <p>Generate cryptographic hashes like SHA-256 and SHA-1 instantly.</p>
+    </a>
+    <a href="articles.html" class="card" tabindex="0" aria-label="Go to Articles">
+      <h2>Articles</h2>
+      <p>Read educational articles on cybersecurity and cryptography.</p>
+    </a>
   </div>
-
-  <script src="script.js"></script>
 </body>
 </html>
