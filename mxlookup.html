@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>MX Lookup - Play Lab</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    :root{
+      --bg:#0f172a; --card:#111827; --accent:#38bdf8; --muted:#94a3b8; --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+    }
+    body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial; margin:0; min-height:100vh; background:linear-gradient(180deg,var(--bg),#020617); color:#e6eef6; display:flex; align-items:flex-start; justify-content:center; padding:28px;}
+    .wrap{width:100%;max-width:980px}
+    .card{background:linear-gradient(180deg,var(--card),#0f172a); border-radius:12px; padding:18px; box-shadow:0 10px 40px rgba(2,6,23,0.6); margin-bottom:18px;}
+    h1{color:var(--accent); margin:0 0 6px}
+    p.lead{color:var(--muted); margin:0 0 12px}
+    label{display:block; margin-top:12px; color:#cfeefd; font-weight:600}
+    input[type="text"]{width:100%; padding:10px; margin-top:8px; border-radius:8px; border:none; background:rgba(255,255,255,0.03); color:#e6eef6; font-size:16px}
+    button{margin-top:12px; padding:10px 12px; border-radius:8px; border:none; cursor:pointer; background:var(--accent); color:#042028; font-weight:700}
+    button.secondary{background:transparent; color:#cfeefd; border:1px solid rgba(255,255,255,0.04)}
+    .row{display:flex; gap:8px; align-items:center; margin-top:12px; flex-wrap:wrap}
+    .result{margin-top:14px}
+    .mxlist{list-style:none; padding:0; margin:10px 0}
+    .mxlist li{padding:8px; border-radius:8px; background:rgba(255,255,255,0.02); margin-bottom:8px; display:flex; justify-content:space-between; align-items:center}
+    .meta{font-size:13px; color:var(--muted)}
+    pre.raw{background:rgba(255,255,255,0.02); padding:10px; border-radius:8px; overflow:auto; font-family:var(--mono); color:#cfeefd; max-height:260px}
+    .small{font-size:13px;color:var(--muted)}
+    a.back{color:var(--accent); text-decoration:none; display:inline-block; margin-top:10px}
+    @media (max-width:720px){ .row{flex-direction:column; align-items:stretch} }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>MX Lookup</h1>
+      <p class="lead">Enter a domain and click <em>Lookup</em> — results come from public DNS-over-HTTPS (Cloudflare / Google). No backend required.</p>
+
+      <label for="domain">Domain</label>
+      <input id="domain" type="text" placeholder="example.com" aria-label="Domain">
+
+      <div class="row">
+        <button id="lookupBtn">Lookup</button>
+        <button id="clearBtn" class="secondary">Clear</button>
+        <div id="status" class="small" style="margin-left:auto">Ready</div>
+      </div>
+
+      <div id="result" class="result" style="display:none">
+        <h3 style="margin-top:18px;color:#cfeefd">MX Records</h3>
+        <div id="mxSection">
+          <ul id="mxList" class="mxlist"></ul>
+          <div id="noMx" class="small" style="display:none">No MX records found for this domain.</div>
+        </div>
+
+        <div style="margin-top:12px;">
+          <div class="small">Raw DNS JSON</div>
+          <pre id="rawJson" class="raw">-</pre>
+        </div>
+
+        <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">
+          <button id="downloadBtn" class="secondary">Download JSON</button>
+          <button id="copyBtn" class="secondary">Copy JSON</button>
+          <a id="openMxTool" class="back" target="_blank" rel="noopener">Open MXToolbox (external)</a>
+        </div>
+      </div>
+
+      <p class="small" style="margin-top:14px">Privacy: this tool queries public DNS servers. Results are shown in your browser only unless you click Download or Copy. Do not use to collect data about others without consent.</p>
+    </div>
+  </div>
+
+<script>
+  // MX Lookup using DNS-over-HTTPS (Cloudflare primary, Google fallback)
+  const lookupBtn = document.getElementById('lookupBtn');
+  const clearBtn = document.getElementById('clearBtn');
+  const domainInput = document.getElementById('domain');
+  const statusEl = document.getElementById('status');
+  const resultEl = document.getElementById('result');
+  const mxListEl = document.getElementById('mxList');
+  const noMxEl = document.getElementById('noMx');
+  const rawJsonEl = document.getElementById('rawJson');
+  const downloadBtn = document.getElementById('downloadBtn');
+  const copyBtn = document.getElementById('copyBtn');
+  const openMxTool = document.getElementById('openMxTool');
+
+  // Normalize and validate domain
+  function normalizeDomain(input) {
+    if (!input) return '';
+    let d = input.trim().toLowerCase();
+    // remove scheme if pasted
+    d = d.replace(/^https?:\/\//,'').replace(/^www\./,'');
+    // remove any path
+    d = d.split('/')[0];
+    // simple validation: contains dot and allowed chars
+    if (!/^[a-z0-9.-]+$/.test(d) || d.length < 3 || d.indexOf('.') === -1) return '';
+    return d;
+  }
+
+  // Primary DoH: Cloudflare
+  async function dohCloudflare(domain) {
+    const url = `https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(domain)}&type=MX`;
+    // Cloudflare supports JSON with this endpoint (CORS enabled)
+    const res = await fetch(url, { headers: { 'Accept': 'application/dns-json' }} );
+    if (!res.ok) throw new Error(`Cloudflare DNS error ${res.status}`);
+    return res.json();
+  }
+
+  // Fallback DoH: Google
+  async function dohGoogle(domain) {
+    const url = `https://dns.google/resolve?name=${encodeURIComponent(domain)}&type=MX`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`Google DNS error ${res.status}`);
+    return res.json();
+  }
+
+  function parseMxFromDnsJson(dnsJson) {
+    // Different DoH responses use "Answer" or "answer" etc.
+    const answers = dnsJson.Answer || dnsJson.answer || dnsJson.Answers || [];
+    const mx = [];
+    for (const a of answers) {
+      // a.type 15 means MX (in some responses)
+      // For Cloudflare/Google, RDATA may be "10 mail.example.com." or for Google 'data' and 'type'
+      // Cloudflare: Answer objects have {name, type, TTL, data}
+      // Google: Answer objects have {name, type, TTL, data}
+      if (!a || typeof a !== 'object') continue;
+      // If it's MX type: either type numeric equals 15 or data contains preference + exchange
+      if (a.type === 15 || (typeof a.data === 'string' && a.data.match(/^\d+\s+/))) {
+        let data = a.data || a.Data || '';
+        // Cloudflare uses "data" like "10 mail.example.com."
+        // Google too.
+        // Split on whitespace to get preference and host
+        const parts = data.trim().split(/\s+/);
+        if (parts.length >= 2) {
+          const preference = parseInt(parts[0], 10);
+          const exchange = parts.slice(1).join(' ').replace(/\.$/, '');
+          mx.push({ preference, exchange, ttl: a.TTL || a.ttl || null });
+        } else {
+          // Some providers use answer.rdata as object — attempt fallback
+          mx.push({ raw: data });
+        }
+      }
+    }
+    return mx;
+  }
+
+  function showMxRecords(mxArray) {
+    mxListEl.innerHTML = '';
+    if (!mxArray || mxArray.length === 0) {
+      noMxEl.style.display = 'block';
+      return;
+    }
+    noMxEl.style.display = 'none';
+    // sort by preference asc
+    mxArray.sort((a,b) => (a.preference || 0) - (b.preference || 0));
+    for (const m of mxArray) {
+      const li = document.createElement('li');
+      const left = document.createElement('div');
+      left.innerHTML = `<strong>${m.exchange || m.raw || '—'}</strong><div class="meta">pref: ${m.preference ?? '-'} · ttl: ${m.ttl ?? '-'}</div>`;
+      const right = document.createElement('div');
+      right.innerHTML = `<a class="small" href="mailto:postmaster@${m.exchange || ''}">postmaster@${m.exchange || ''}</a>`;
+      li.appendChild(left);
+      li.appendChild(right);
+      mxListEl.appendChild(li);
+    }
+  }
+
+  async function doLookup(domain) {
+    statusEl.textContent = 'Looking up MX...';
+    resultEl.style.display = 'none';
+    rawJsonEl.textContent = '-';
+    mxListEl.innerHTML = '';
+    noMxEl.style.display = 'none';
+    openMxTool.href = `https://mxtoolbox.com/MXLookup.aspx?domain=${encodeURIComponent(domain)}`;
+    try {
+      let json;
+      try {
+        json = await dohCloudflare(domain);
+        statusEl.textContent = 'Got answer from Cloudflare';
+      } catch (err) {
+        console.warn('Cloudflare DoH failed, trying Google:', err);
+        json = await dohGoogle(domain);
+        statusEl.textContent = 'Got answer from Google DNS';
+      }
+
+      // show raw json
+      rawJsonEl.textContent = JSON.stringify(json, null, 2);
+
+      // parse mx
+      const mx = parseMxFromDnsJson(json);
+      showMxRecords(mx);
+
+      // if no MX, suggest A records check (common fallback)
+      if (!mx || mx.length === 0) {
+        statusEl.textContent += ' — no MX records';
+      } else {
+        statusEl.textContent += ` — ${mx.length} MX record(s)`;
+      }
+
+      resultEl.style.display = 'block';
+    } catch (err) {
+      console.error(err);
+      statusEl.textContent = 'Lookup failed: ' + (err.message || 'unknown error');
+      alert('Lookup failed: ' + (err.message || 'unknown error'));
+    }
+  }
+
+  // Event handlers
+  lookupBtn.addEventListener('click', () => {
+    const raw = domainInput.value;
+    const d = normalizeDomain(raw);
+    if (!d) return alert('Please enter a valid domain (e.g. example.com)');
+    doLookup(d);
+  });
+
+  domainInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      lookupBtn.click();
+    }
+  });
+
+  clearBtn.addEventListener('click', () => {
+    domainInput.value = '';
+    mxListEl.innerHTML = '';
+    rawJsonEl.textContent = '-';
+    resultEl.style.display = 'none';
+    statusEl.textContent = 'Ready';
+  });
+
+  downloadBtn.addEventListener('click', () => {
+    const txt = rawJsonEl.textContent;
+    if (!txt || txt.trim() === '-' ) return alert('No data to download');
+    const blob = new Blob([txt], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `mx-${(domainInput.value||'domain')}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  });
+
+  copyBtn.addEventListener('click', async () => {
+    try {
+      const txt = rawJsonEl.textContent;
+      if (!txt || txt.trim() === '-') return alert('No data to copy');
+      await navigator.clipboard.writeText(txt);
+      alert('JSON copied to clipboard');
+    } catch (err) {
+      alert('Copy failed: ' + err.message);
+    }
+  });
+
+  // Pre-fill example
+  domainInput.value = 'example.com';
+</script>
+</body>
+</html>
