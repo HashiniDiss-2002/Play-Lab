@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Base64 Image Generator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background-color: #ffffff;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      max-width: 500px;
+      width: 100%;
+      text-align: center;
+    }
+    h1 {
+      color: #333;
+    }
+    input[type="file"] {
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background-color: #fff;
+    }
+    #output {
+      margin-top: 20px;
+      word-wrap: break-word;
+      font-size: 14px;
+      background-color: #f0f0f0;
+      padding: 10px;
+      border-radius: 5px;
+      color: #333;
+      max-height: 150px;
+      overflow-y: auto;
+    }
+    img {
+      max-width: 100%;
+      margin-top: 20px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Base64 Image Generator</h1>
+    <input type="file" id="imageInput" accept="image/*" />
+    <div id="output">Base64 String will appear here</div>
+    <img id="imagePreview" src="" alt="Image Preview" />
+  </div>
+
+  <script>
+    // Get elements from DOM
+    const imageInput = document.getElementById("imageInput");
+    const outputDiv = document.getElementById("output");
+    const imagePreview = document.getElementById("imagePreview");
+
+    // Function to handle image input change (file upload)
+    imageInput.addEventListener("change", function(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+
+        // Event listener for file reading completion
+        reader.onload = function(e) {
+          const base64String = e.target.result; // Base64 encoded string
+          
+          // Show Base64 string in the output div
+          outputDiv.textContent = base64String;
+
+          // Set image preview
+          imagePreview.src = base64String;
+        };
+
+        // Read the image file as a data URL (Base64)
+        reader.readAsDataURL(file);
+      }
+    });
+  </script>
+</body>
+</html>
