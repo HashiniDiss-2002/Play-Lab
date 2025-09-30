@@ -2,8 +2,147 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>CypherLab - Caesar Cipher</title>
-  <link rel="stylesheet" href="style.css">
+  <style>
+    /* General Styles */
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #1a202c;
+      color: #e6eef6;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      background-color: #111827;
+      border-radius: 14px;
+      padding: 40px;
+      box-shadow: 0 6px 24px rgba(2, 6, 23, 0.5);
+      width: 100%;
+      max-width: 600px;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2.5rem;
+      color: #38bdf8;
+      margin-bottom: 16px;
+    }
+
+    h2 {
+      text-align: center;
+      font-size: 1.8rem;
+      color: #38bdf8;
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 1rem;
+      color: #94a3b8;
+    }
+
+    select, input, textarea {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 20px;
+      background-color: #2d3748;
+      color: #e6eef6;
+      border: 1px solid #4a5568;
+      border-radius: 5px;
+      font-size: 1rem;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 150px;
+    }
+
+    button {
+      background-color: #38bdf8;
+      color: #111827;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 5px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    button:hover {
+      background-color: #2b82db;
+    }
+
+    .note {
+      text-align: center;
+      font-size: 0.9rem;
+      color: #94a3b8;
+      margin-top: 20px;
+    }
+
+    /* Media Queries for Responsiveness */
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2rem;
+      }
+
+      h2 {
+        font-size: 1.5rem;
+      }
+
+      label {
+        font-size: 0.9rem;
+      }
+
+      select, input, textarea {
+        font-size: 0.9rem;
+        padding: 10px;
+      }
+
+      button {
+        font-size: 1rem;
+        padding: 10px;
+      }
+
+      .note {
+        font-size: 0.8rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 1.8rem;
+      }
+
+      h2 {
+        font-size: 1.3rem;
+      }
+
+      label {
+        font-size: 0.8rem;
+      }
+
+      select, input, textarea {
+        font-size: 0.8rem;
+        padding: 8px;
+      }
+
+      button {
+        font-size: 0.9rem;
+        padding: 8px;
+      }
+
+      .note {
+        font-size: 0.7rem;
+      }
+    }
+  </style>
 </head>
 <body>
   <div class="container">
@@ -29,6 +168,31 @@
     <p class="note">This Caesar Cipher tool works offline and is safe to use.</p>
   </div>
 
-  <script src="script.js"></script>
+  <script>
+    function processText() {
+      const mode = document.getElementById("mode").value;
+      const shift = parseInt(document.getElementById("shift").value);
+      const inputText = document.getElementById("input").value;
+      let outputText = "";
+
+      if (mode === "encode") {
+        outputText = caesarCipher(inputText, shift);
+      } else {
+        outputText = caesarCipher(inputText, -shift);
+      }
+
+      document.getElementById("output").value = outputText;
+    }
+
+    function caesarCipher(str, shift) {
+      return str.split('').map(char => {
+        if (/[a-zA-Z]/.test(char)) {
+          const startCode = char === char.toLowerCase() ? 97 : 65;
+          return String.fromCharCode((char.charCodeAt(0) - startCode + shift + 26) % 26 + startCode);
+        }
+        return char;
+      }).join('');
+    }
+  </script>
 </body>
 </html>
