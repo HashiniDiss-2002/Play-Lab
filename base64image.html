@@ -12,6 +12,7 @@
       --text-light: #e6eef6;
       --text-muted: #94a3b8;
     }
+
     body {
       margin: 0;
       min-height: 100vh;
@@ -23,122 +24,7 @@
       align-items: center;
       padding: 40px 20px;
     }
+
     h1 {
       font-size: 3rem;
       margin-bottom: 16px;
-      color: var(--accent);
-      user-select: none;
-    }
-    p.subtitle {
-      margin: 0 0 40px;
-      font-size: 1.2rem;
-      color: var(--text-muted);
-      user-select: none;
-    }
-    .container {
-      background-color: var(--card-bg);
-      padding: 30px;
-      border-radius: 14px;
-      box-shadow: 0 6px 24px rgba(2, 6, 23, 0.5);
-      width: 100%;
-      max-width: 500px;
-      text-align: center;
-    }
-    input[type="file"] {
-      padding: 10px;
-      margin: 10px 0;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      background-color: #fff;
-      color: #333;
-      width: 100%;
-    }
-    #output {
-      margin-top: 20px;
-      word-wrap: break-word;
-      font-size: 14px;
-      background-color: #f0f0f0;
-      padding: 10px;
-      border-radius: 5px;
-      color: #333;
-      max-height: 150px;
-      overflow-y: auto;
-    }
-    img {
-      max-width: 100%;
-      margin-top: 20px;
-      border-radius: 5px;
-    }
-    button {
-      background-color: var(--accent);
-      border: none;
-      padding: 12px 20px;
-      color: var(--text-light);
-      font-size: 16px;
-      border-radius: 5px;
-      cursor: pointer;
-      margin-top: 20px;
-    }
-    button:hover {
-      background-color: #2b82db;
-    }
-  </style>
-</head>
-<body>
-  <h1>Base64 Image Generator</h1>
-  <p class="subtitle">Upload an image to convert it to Base64</p>
-
-  <div class="container">
-    <input type="file" id="imageInput" accept="image/*" />
-    <div id="output">Base64 String will appear here</div>
-    <img id="imagePreview" src="" alt="Image Preview" />
-    <button id="copyButton">Copy Base64</button>
-  </div>
-
-  <script>
-    // Get elements from DOM
-    const imageInput = document.getElementById("imageInput");
-    const outputDiv = document.getElementById("output");
-    const imagePreview = document.getElementById("imagePreview");
-    const copyButton = document.getElementById("copyButton");
-
-    // Function to handle image input change (file upload)
-    imageInput.addEventListener("change", function(event) {
-      const file = event.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-
-        // Event listener for file reading completion
-        reader.onload = function(e) {
-          const base64String = e.target.result; // Base64 encoded string
-          
-          // Show Base64 string in the output div
-          outputDiv.textContent = base64String;
-
-          // Set image preview
-          imagePreview.src = base64String;
-        };
-
-        // Read the image file as a data URL (Base64)
-        reader.readAsDataURL(file);
-      }
-    });
-
-    // Copy Base64 string to clipboard
-    copyButton.addEventListener("click", function() {
-      const base64String = outputDiv.textContent;
-      if (base64String && base64String !== "Base64 String will appear here") {
-        navigator.clipboard.writeText(base64String)
-          .then(() => {
-            alert("Base64 string copied to clipboard!");
-          })
-          .catch(err => {
-            alert("Failed to copy text: ", err);
-          });
-      } else {
-        alert("No Base64 string to copy!");
-      }
-    });
-  </script>
-</body>
-</html>
