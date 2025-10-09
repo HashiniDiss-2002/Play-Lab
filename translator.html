@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <link rel="icon" href=" " type="image/x-icon">
+  <meta charset="utf-8" />
+  <title>Language Translator - Play Lab</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    :root{
+      --bg:#0f172a; --card:#111827; --accent:#38bdf8; --muted:#94a3b8; --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+    }
+    body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial; margin:0; min-height:100vh; background:linear-gradient(180deg,var(--bg),#020617); color:#e6eef6; display:flex; align-items:flex-start; justify-content:center; padding:28px;}
+    .wrap{width:100%;max-width:980px; padding: 20px; box-sizing: border-box;}
+    .card{background:linear-gradient(180deg,var(--card),#0f172a); border-radius:12px; padding:18px; box-shadow:0 10px 40px rgba(2,6,23,0.6); margin-bottom:18px;}
+    h1{color:var(--accent); margin:0 0 6px;}
+    p.lead{color:var(--muted); margin:0 0 12px;}
+    label{display:block; margin-top:12px; color:#cfeefd; font-weight:600;}
+    input[type="text"]{width:100%; padding:10px; margin-top:8px; border-radius:8px; border:none; background:rgba(255,255,255,0.03); color:#e6eef6; font-size:16px;}
+    select{width:100%; padding:10px; margin-top:8px; border-radius:8px; border:none; background:rgba(255,255,255,0.03); color:#e6eef6; font-size:16px;}
+    button{margin-top:12px; padding:10px 12px; border-radius:8px; border:none; cursor:pointer; background:var(--accent); color:#042028; font-weight:700;}
+    button.secondary{background:transparent; color:#cfeefd; border:1px solid rgba(255,255,255,0.04);}
+    .row{display:flex; gap:8px; align-items:center; margin-top:12px; flex-wrap:wrap;}
+    .result{margin-top:14px;}
+    .small{font-size:13px;color:var(--muted);}
+    .meta{font-size:13px; color:var(--muted);}
+    pre.raw{background:rgba(255,255,255,0.02); padding:10px; border-radius:8px; overflow:auto; font-family:var(--mono); color:#cfeefd; max-height:260px;}
+    
+    /* Mobile Responsive */
+    @media (max-width: 720px) {
+      .row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      button {
+        width: 100%;
+      }
+      .wrap {
+        padding: 15px;
+      }
+      h1 {
+        font-size: 24px;
+      }
+      p.lead {
+        font-size: 14px;
+      }
+      input[type="text"] {
+        font-size: 14px;
+      }
+      .meta {
+        font-size: 12px;
+      }
+      .result h3 {
+        font-size: 18px;
+      }
+      pre.raw {
+        font-size: 12px;
+        max-height: 200px;
+      }
+      .small {
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Language Translator</h1>
+      <p class="lead">Enter text, choose the target language, and click <em>Translate</em></p>
+
+      <label for="text">Text to Translate</label>
+      <input id="text" type="text" placeholder="Enter text" aria-label="Text to translate">
+
+      <label for="language">Target Language</label>
+      <select id="language">
+        <option value="es">Spanish</option>
+        <option value="fr">French</option>
+        <option value="de">German</option>
+        <option value="it">Italian</option>
+        <option value="pt">Portuguese</option>
+        <option value="sv">Swedish</option>
+        <option value="en">English</option>
+        <option value="no">Norwegian</option>
+        <option value="fi">Finnish</option>
+        <option value="lt">Lithuanian</option>
+      </select>
+
+      <div class="row">
+        <button id="translateBtn">Translate</button>
+        <button id="clearBtn" class="secondary">Clear</button>
+        <div id="status" class="small" style="margin-left:auto">Ready</div>
+      </div>
+
+      <div id="result" class="result" style="display:none">
+        <h3 style="margin-top:18px;color:#cfeefd">Translated Text</h3>
+        <p id="translatedText" style="color:#e6eef6;"></p>
+      </div>
+
+      <p class="small" style="margin-top:14px">Privacy: this tool uses public translation services. Results are shown in your browser only unless you share or store them.</p>
+    </div>
+  </div>
+
+<script>
+  // Translate button functionality
+  document.getElementById('translateBtn').addEventListener('click', async function () {
+    const text = document.getElementById('text').value.trim();
+    const targetLang = document.getElementById('language').value;
+
+    if (!text) {
+      alert('Please enter text to translate!');
+      return;
+    }
+
+    document.getElementById('status').textContent = 'Translating...';
+
+    try {
+      // Use a translation API (LibreTranslate in this example)
+      const response = await fetch('https://libretranslate.de/translate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          q: text,
+          source: 'auto',
+          target: targetLang,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.translatedText) {
+        // Display the translated text
+        document.getElementById('translatedText').textContent = data.translatedText;
+        document.getElementById('result').style.display = 'block'; // Show result section
+      } else {
+        alert('Error: Could not translate the text');
+      }
+
+    } catch (error) {
+      console.error('Error translating text:', error);
+      alert('There was an error translating the text.');
+    } finally {
+      document.getElementById('status').textContent = 'Ready'; // Reset status
+    }
+  });
+
+  // Clear button functionality
+  document.getElementById('clearBtn').addEventListener('click', function () {
+    document.getElementById('text').value = '';
+    document.getElementById('translatedText').textContent = '';
+    document.getElementById('result').style.display = 'none';
+    document.getElementById('status').textContent = 'Ready';
+  });
+</script>
+
+</body>
+</html>
